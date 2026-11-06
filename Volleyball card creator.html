@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Volleyball Card Creator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#e7edf3;--panel:#fff;--ink:#14202b;--mute:#5b6b7a;--line:#cdd7e0;--acc:#0b5fff;--accx:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1219;--panel:#161f29;--ink:#e8eef4;--mute:#93a3b3;--line:#2a3745;--acc:#5b94ff;--accx:#06101f}}
+:root[data-theme="dark"]{--bg:#0c1219;--panel:#161f29;--ink:#e8eef4;--mute:#93a3b3;--line:#2a3745;--acc:#5b94ff;--accx:#06101f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 Barlow,system-ui,-apple-system,"Segoe UI",sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font:700 34px/1 "Barlow Condensed",Impact,sans-serif;margin:0 0 4px;letter-spacing:.5px}
+.sub{color:var(--mute);margin:0 0 20px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:20px;align-items:start}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}.stage{order:-1;position:static!important}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel h2{font:600 18px "Barlow Condensed",sans-serif;margin:18px 0 8px;letter-spacing:.3px}
+.panel h2:first-child{margin-top:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:block;font-size:13px;color:var(--mute);margin-bottom:8px}
+input[type=text],input[type=number],select{width:100%;margin-top:3px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.tiers{display:flex;flex-wrap:wrap;gap:8px}
+.tier{width:46px;height:46px;border-radius:8px;border:2px solid transparent;cursor:pointer;padding:0}
+.tier[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
+.tname{font-size:13px;color:var(--mute);margin-top:6px;min-height:18px}
+.sr{display:grid;grid-template-columns:42px 1fr 34px;gap:10px;align-items:center;margin:6px 0}
+.sr span{font:600 15px "Barlow Condensed",sans-serif;letter-spacing:.5px}
+.sr output{text-align:right;font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.chk{display:flex;gap:8px;align-items:center;margin:10px 0;font-size:14px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.b{font:600 14px Barlow,sans-serif;padding:8px 14px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+button.b.p{background:var(--acc);color:var(--accx);border-color:var(--acc);font-size:15px;padding:10px 18px}
+.stage{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:center;gap:12px}
+#cv{width:300px;height:auto;aspect-ratio:600/860;filter:drop-shadow(0 12px 18px rgba(0,0,0,.35))}
+.note{font-size:13px;color:var(--mute);text-align:center;max-width:300px;min-height:36px}
+</style>
+</head>
+<body>
+<main>
+<h1>Volleyball card creator</h1>
+<p class="sub">Build a player card, pick a tier, set the stats, then save it as a PNG.</p>
+<div class="wrap">
+ <div class="panel">
+  <h2>Player</h2>
+  <div class="row">
+   <label class="f">Name<input type="text" id="name" maxlength="18" value="Your Name"></label>
+   <label class="f">Position<select id="pos"></select></label>
+  </div>
+  <div class="row">
+   <label class="f">Nation (flag emoji)<input type="text" id="flag" maxlength="4" value="🇦🇺"></label>
+   <label class="f">Club badge (up to 3 characters)<input type="text" id="club" maxlength="3" value="🏐"></label>
+  </div>
+  <label class="f">Player photo<input type="file" id="photo" accept="image/*" style="display:block;margin-top:4px;font:inherit;color:var(--ink)"></label>
+  <h2>Tier</h2>
+  <div class="tiers" id="tiers"></div>
+  <div class="tname" id="tname"></div>
+  <h2>Rating and stats</h2>
+  <label class="chk"><input type="checkbox" id="auto" checked> Work out overall from stats and position</label>
+  <label class="f">Overall<input type="number" id="ovr" min="1" max="99" value="85" disabled></label>
+  <div id="stats"></div>
+  <div class="btns">
+   <button class="b" id="rand" type="button">Randomize stats</button>
+   <button class="b" id="clr" type="button">Remove photo</button>
+  </div>
+ </div>
+ <div class="stage">
+  <canvas id="cv" width="600" height="860" aria-label="Player card preview"></canvas>
+  <button class="b p" id="save" type="button" hidden>Save card as PNG</button>
+  <div class="note" id="note"></div>
+ </div>
+</div>
+</main>
+<script>
+const TIERS=[
+ {n:"Bronze",c:["#e0a46c","#a8683a","#5e3517","#3a1f0c"]},
+ {n:"Silver",c:["#f0f4f8","#a9b4c2","#5d6978","#222a35"]},
+ {n:"Gold",c:["#fbe58a","#d4a62e","#7a5710","#3f2c04"]},
+ {n:"Rare gold",c:["#fff0a8","#e6b422","#8a5f00","#2c1f00"]},
+ {n:"Icon",c:["#ffffff","#f1dca0","#b58a2c","#3a2a00"]},
+ {n:"Team of the week",c:["#4a4a4a","#1c1c1c","#000000","#f0d36b"]},
+ {n:"Special",c:["#b58cff","#6a3fcf","#240f5c","#ffffff"]},
+ {n:"Team of the season",c:["#6fe3f2","#1294a8","#04303b","#effdff"]}
+];
+const KEYS=["ATK","BLK","SRV","DIG","SET","PHY"];
+const POS={
+ OH:{n:"Outside hitter",w:[.30,.10,.15,.20,0,.25]},
+ MB:{n:"Middle blocker",w:[.25,.35,.10,.05,.05,.20]},
+ OPP:{n:"Opposite",w:[.35,.20,.15,.05,.05,.20]},
+ S:{n:"Setter",w:[.05,.10,.15,.10,.50,.10]},
+ L:{n:"Libero",w:[0,0,0,.65,.15,.20]},
+ DS:{n:"Defensive specialist",w:[0,0,.10,.60,.10,.20]}
+};
+const $=id=>document.getElementById(id);
+const st={tier:2,vals:[85,70,80,75,60,78]};
+const W=600,H=860,cv=$("cv"),x=cv.getContext("2d");
+let img=null,dl=null;
+const F=(w,s)=>`${w} ${s}px "Barlow Condensed",Impact,"Arial Narrow",sans-serif`;
+
+$("pos").innerHTML=Object.keys(POS).map(k=>`<option value="${k}">${k} – ${POS[k].n}</option>`).join("");
+$("tiers").innerHTML=TIERS.map((t,i)=>`<button type="button" class="tier" data-i="${i}" aria-label="${t.n}" aria-pressed="false" style="background:linear-gradient(150deg,${t.c[0]},${t.c[1]} 55%,${t.c[2]})"></button>`).join("");
+$("stats").innerHTML=KEYS.map((k,i)=>`<label class="sr"><span>${k}</span><input type="range" min="1" max="99" data-s="${i}"><output></output></label>`).join("");
+
+function shield(i){
+ const p=new Path2D(),a=4+i,b=W-4-i,t=4+i,m=H-4-i;
+ p.moveTo(a+110,t);p.lineTo(b-110,t);p.quadraticCurveTo(b-24,t+8,b,t+86);p.lineTo(b,m-180);
+ p.bezierCurveTo(b,m-100,b-130,m-36,W/2,m);p.bezierCurveTo(a+130,m-36,a,m-100,a,m-180);
+ p.lineTo(a,t+86);p.quadraticCurveTo(a+24,t+8,a+110,t);p.closePath();return p;
+}
+function lin(x0,y0,x1,y1,s){const g=x.createLinearGradient(x0,y0,x1,y1);s.forEach(v=>g.addColorStop(v[0],v[1]));return g}
+function fit(txt,font,max){let s=font;x.font=F(700,s);while(x.measureText(txt).width>max&&s>24){s-=2;x.font=F(700,s)}return s}
+
+function draw(){
+ const c=TIERS[st.tier].c,tx=c[3],ovr=$("ovr").value||"0";
+ x.clearRect(0,0,W,H);x.save();
+ const body=shield(0);
+ x.fillStyle=lin(0,0,W,H,[[0,c[0]],[.45,c[1]],[1,c[2]]]);x.fill(body);
+ x.clip(body);
+ // soft glow
+ let g=x.createRadialGradient(W*.62,H*.28,10,W*.62,H*.28,380);
+ g.addColorStop(0,"rgba(255,255,255,.42)");g.addColorStop(1,"rgba(255,255,255,0)");
+ x.fillStyle=g;x.fillRect(0,0,W,H);
+ // net pattern, lower half
+ x.strokeStyle=tx;x.globalAlpha=.07;x.lineWidth=2;
+ for(let i=-H;i<W+H;i+=34){x.beginPath();x.moveTo(i,440);x.lineTo(i+H,440+H);x.stroke();x.beginPath();x.moveTo(i+H,440);x.lineTo(i,440+H);x.stroke()}
+ x.globalAlpha=1;
+ // big volleyball seams
+ const bx=W*.63,by=H*.3,r=215;
+ x.save();x.beginPath();x.arc(bx,by,r,0,7);x.clip();
+ x.strokeStyle=tx;x.globalAlpha=.13;x.lineWidth=12;
+ for(let k=0;k<3;k++){const an=k*2.0944+.5;x.beginPath();x.arc(bx+Math.cos(an)*r*1.1,by+Math.sin(an)*r*1.1,r*.95,0,7);x.stroke()}
+ x.restore();
+ x.globalAlpha=.13;x.strokeStyle=tx;x.lineWidth=12;x.beginPath();x.arc(bx,by,r,0,7);x.stroke();x.globalAlpha=1;
+ // photo or silhouette
+ if(img){
+  const o=document.createElement("canvas");o.width=340;o.height=420;const q=o.getContext("2d");
+  const s=Math.max(340/img.width,420/img.height),w=img.width*s,h=img.height*s;
+  q.drawImage(img,(340-w)/2,0,w,h);
+  q.globalCompositeOperation="destination-in";
+  const m=q.createLinearGradient(0,290,0,420);m.addColorStop(0,"#000");m.addColorStop(1,"rgba(0,0,0,0)");
+  q.fillStyle=m;q.fillRect(0,0,340,420);x.drawImage(o,215,50);
+ }else{
+  x.save();x.beginPath();x.rect(215,50,340,430);x.clip();x.globalAlpha=.2;x.fillStyle=tx;
+  x.beginPath();x.arc(385,205,62,0,7);x.fill();x.beginPath();x.ellipse(385,470,150,200,0,Math.PI,2*Math.PI);x.fill();x.restore();
+ }
+ // light sweep
+ x.fillStyle=lin(0,60,W,H-60,[[.3,"rgba(255,255,255,0)"],[.46,"rgba(255,255,255,.3)"],[.52,"rgba(255,255,255,.05)"],[.6,"rgba(255,255,255,0)"]]);
+ x.fillRect(0,0,W,H);
+ // lower shade so stats read
+ x.fillStyle=lin(0,500,0,H,[[0,"rgba(0,0,0,0)"],[1,"rgba(0,0,0,.18)"]]);x.fillRect(0,500,W,H-500);
+ // left column
+ x.fillStyle=tx;x.textAlign="center";x.textBaseline="alphabetic";
+ x.font=F(700,130);x.fillText(ovr,100,200);
+ x.font=F(600,56);x.fillText($("pos").value,100,262);
+ x.fillRect(62,284,76,4);
+ x.font="56px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";x.fillText($("flag").value,100,360);
+ const cl=$("club").value;x.font=F(700,fit(cl,48,92));x.fillText(cl,100,428);
+ // name
+ const nm=($("name").value||"Player").toUpperCase();
+ x.font=F(700,fit(nm,84,440));x.shadowColor="rgba(255,255,255,.3)";x.shadowOffsetY=2;x.fillText(nm,W/2,548);x.shadowColor="transparent";
+ x.fillStyle=lin(80,0,520,0,[[0,"rgba(0,0,0,0)"],[.5,tx],[1,"rgba(0,0,0,0)"]]);x.fillRect(80,574,440,3);
+ // stats
+ x.fillStyle=tx;
+ st.vals.forEach((v,i)=>{
+  const col=i%2,row=(i/2)|0,y=650+row*64,nx=col?402:222;
+  x.textAlign="right";x.font=F(700,54);x.fillText(v,nx,y);
+  x.textAlign="left";x.font=F(500,40);x.globalAlpha=.85;x.fillText(KEYS[i],nx+14,y);x.globalAlpha=1;
+ });
+ x.globalAlpha=.3;x.fillRect(W/2-1,608,3,170);x.globalAlpha=1;
+ x.restore();
+ // borders
+ x.lineJoin="round";
+ x.strokeStyle=lin(0,0,W,H,[[0,c[0]],[.5,c[1]],[1,c[2]]]);x.lineWidth=8;x.stroke(shield(0));
+ x.strokeStyle=tx;x.globalAlpha=.6;x.lineWidth=3;x.stroke(shield(16));
+ x.globalAlpha=.25;x.lineWidth=2;x.stroke(shield(27));x.globalAlpha=1;
+}
+
+function calc(){
+ const w=POS[$("pos").value].w;
+ return Math.max(1,Math.min(99,Math.round(w.reduce((a,v,i)=>a+v*st.vals[i],0))));
+}
+function render(){
+ document.querySelectorAll(".tier").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.i===st.tier)));
+ $("tname").textContent=TIERS[st.tier].n;
+ const auto=$("auto").checked;$("ovr").disabled=auto;
+ if(auto)$("ovr").value=calc();
+ document.querySelectorAll("[data-s]").forEach(r=>{r.value=st.vals[r.dataset.s];r.nextElementSibling.textContent=st.vals[r.dataset.s]});
+ draw();
+}
+document.querySelectorAll(".tier").forEach(b=>b.onclick=()=>{st.tier=+b.dataset.i;render()});
+document.querySelectorAll("[data-s]").forEach(r=>r.oninput=()=>{st.vals[r.dataset.s]=+r.value;render()});
+["name","pos","flag","club","auto"].forEach(id=>$(id).addEventListener("input",render));
+$("ovr").addEventListener("input",()=>{$("ovr").value=Math.max(1,Math.min(99,+$("ovr").value||1));render()});
+$("rand").onclick=()=>{st.vals=st.vals.map(()=>40+Math.floor(Math.random()*58));render()};
+$("photo").onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{const i=new Image();i.onload=()=>{img=i;draw()};i.src=r.result};
+ r.readAsDataURL(f);
+};
+$("clr").onclick=()=>{$("photo").value="";img=null;draw()};
+$("save").onclick=()=>{
+ cv.toBlob(async b=>{
+  try{
+   await dl.save({filename:(($("name").value||"player").trim().replace(/[^\w-]+/g,"-")||"player")+"-card.png",data:b});
+   $("note").textContent="Card saved.";
+  }catch(e){$("note").textContent=e&&e.code==="declined"?"Save cancelled.":"Couldn’t save the card here. Try pressing and holding the card to save the image."}
+ },"image/png");
+};
+(async()=>{
+ try{dl=window.claude?await window.claude.use("downloads"):null}catch(e){dl=null}
+ if(dl)$("save").hidden=false;else $("note").textContent="Press and hold (or right-click) the card to save it as an image.";
+})();
+render();
+if(document.fonts){Promise.all([document.fonts.load(F(700,40)),document.fonts.load(F(500,40))]).then(draw).catch(()=>{});document.fonts.ready.then(draw)}
+</script>
+</body>
+</html>
